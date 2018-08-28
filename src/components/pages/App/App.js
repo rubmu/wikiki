@@ -1,9 +1,15 @@
 // @flow
 
-import React, { Component } from 'react'
-import styled, { keyframes } from 'styled-components'
+/* globals gapi */ // eslint-disable-line no-unused-vars
 
-import logo from './logo.svg'
+import React, { PureComponent } from 'react'
+import styled from 'styled-components'
+import { connect } from 'react-redux'
+
+import SignInSignOut from 'components/molecules/SignInSignOut/SignInSignOut'
+
+// flow globals
+declare var gapi: Object
 
 const AppRoot = styled.div`
 text-align: center;
@@ -14,43 +20,43 @@ height: 100vh;
 
 const Header = styled.header`
 height: 150px;
-padding: 20px;
-`
-
-const rotate360 = keyframes`
-from { transform: rotate(0deg); }
-to { transform: rotate(360deg); }
-`
-
-const Logo = styled.img`
-animation: ${rotate360} infinite 20s linear;
-height: 80px;
+padding: 8px;
 `
 
 const Title = styled.h1`
-font-size: 1.5em;
+font-size: 0.9em;
+line-height: 2.6em;
+display: inline;
 `
 
-const Intro = styled.p`
+const Content = styled.p`
 font-size: large;
 code { color: cyan; }
 `
 
-class App extends Component<Object> {
+class App extends PureComponent<Object, Object> {
 
   render() {
+    const { signedIn, user } = this.props || {};
+    const { name } = user || {};
     return (
       <AppRoot>
         <Header>
-          <Logo src={logo} alt="logo" />
-          <Title>Welcome to React</Title>
+          <SignInSignOut onLogin={this.onLogin} onLogout={this.onLogout} onUserChange={this.onUserChange} />
+          <Title>{signedIn ? `Welcome ${name}!` : 'Please log in.'}</Title>
         </Header>
-        <Intro>
-          To get started, edit <code>src/components/pages/App/App.js</code> and save to reload.
-        </Intro>
+        <Content>
+          TODO
+        </Content>
       </AppRoot>
     )
   }
 }
 
-export default App
+export default connect(
+  (state) => ({
+    signedIn: state.gapi.status.signedIn,
+    user: state.gapi.user,
+  }),
+  null
+)(App)
