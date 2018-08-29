@@ -1,9 +1,5 @@
 // @flow
-
-export const CURRENT_USER = '@wikiki/gapi/CURRENT_USER'
-export const USER_STATUS = '@wikiki/gapi/USER_STATE'
-export const SIGN_OUT = '@wikiki/gapi/SIGN_OUT'
-export const SIGN_OUT_STARTED = '@wikiki/gapi/SIGN_OUT_STARTED'
+import conf from 'conf/gapiConfig'
 
 const _initialited = false
 
@@ -16,7 +12,25 @@ const _getProfile = (user) => {
   } : null
 }
 
-export const initGapi = () => dispatch => {
+const _loadDrive = () => {
+  return new Promise((resolve, reject) => {
+
+    if (window.gapi.client && window.gapi.client.drive) {
+      resolve(window.gapi.client.drive)
+      return
+    }
+    window.gapi.load('client', () => {
+      window.gapi.client.load('drive', 'v3', () => {
+        resolve(window.gapi.client.drive)
+      })
+    })
+  });
+}
+
+export const CURRENT_USER = '@wikiki/gapi/CURRENT_USER'
+export const USER_STATUS = '@wikiki/gapi/USER_STATE'
+
+export const initGapi = () => (dispatch: Function) => {
   if (_initialited) {
     return
   }
@@ -30,43 +44,64 @@ export const initGapi = () => dispatch => {
   // console.log('Initializing gapi...')
   window.gapi.load('auth2', () => {
 
-    this.auth2 = window.gapi.auth2.getAuthInstance()
-    if (!this.auth2) {
-      this.auth2 = window.gapi.auth2.init({
-        // $FlowFixMe
-        client_id: document.querySelector('meta[name=google-signin-client_id]').content,
-        scope: 'profile',
+    let auth2 = window.gapi.auth2.getAuthInstance()
+    // $FlowFixMe
+    if (!auth2) {
+      auth2 = window.gapi.auth2.init({
+        apiKey: conf.apiKey,
+        clientId: conf.clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        // discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
       })
     }
 
     // Listen for sign-in state changes.
-    this.auth2.isSignedIn.listen((val) => {
+    auth2.isSignedIn.listen((val) => {
       dispatch({ type: USER_STATUS, payload: { signedIn: val } })
     })
 
     // Listen for changes to current user.
-    this.auth2.currentUser.listen((user) => {
+    auth2.currentUser.listen((user) => {
       dispatch({ type: CURRENT_USER, payload: { user: _getProfile(user) } })
     })
 
     // Sign in the user if they are currently signed in.
-    if (this.auth2.isSignedIn.get()) {
-      this.auth2.signIn()
+    if (auth2.isSignedIn.get()) {
+      auth2.signIn()
     }
 
     // Start with the current live values.
-    if (this.auth2) {
-      const user = _getProfile(this.auth2.currentUser.get())
+    if (auth2) {
+      const user = _getProfile(auth2.currentUser.get())
       dispatch({ type: CURRENT_USER, payload: { user } })
-      const signedIn = this.auth2.isSignedIn.get()
+      const signedIn = auth2.isSignedIn.get()
       dispatch({ type: USER_STATUS, payload: { signedIn } })
     }
 
   })
 }
 
-export const signOut = () => (dispatch) => {
+export const SIGN_OUT = '@wikiki/gapi/SIGN_OUT'
+export const SIGN_OUT_STARTED = '@wikiki/gapi/SIGN_OUT_STARTED'
+
+export const signOut = () => (dispatch: Function) => {
   const auth2 = window.gapi.auth2.getAuthInstance()
   dispatch({ type: SIGN_OUT_STARTED });
   auth2.signOut().then(() => dispatch({ type: SIGN_OUT }))
+}
+
+export const FILES = '@wikiki/gapi/FILES'
+export const FILES_STARTED = '@wikiki/gapi/FILES_STARTED'
+
+export const files = () => (dispatch: Function) => {
+
+  dispatch({ type: FILES_STARTED })
+  _loadDrive().then((drive) => {
+    return drive.files.list()
+  }).then((response) => {
+    dispatch({ type: FILES, payload: response })
+  }).catch((error) => {
+    dispatch({ type: FILES, error: true, meta: { errorMessage: 'An error occured trying to get the files list.' } })
+    alert('An error occured trying to get the files list.')
+  })
 }

@@ -1,5 +1,5 @@
 
-import { CURRENT_USER, USER_STATUS } from 'actions/gapiActions'
+import { FILES, CURRENT_USER, USER_STATUS } from 'actions/gapiActions'
 
 export default (state = { user: null, status: { signedIn: false }}, action: Object) => {
   const { type, payload /*, meta, error */ } = action || {}
@@ -8,6 +8,8 @@ export default (state = { user: null, status: { signedIn: false }}, action: Obje
       return { ...state, user: payload.user }
     case USER_STATUS:
       return { ...state, status: { ...state.status, signedIn: payload.signedIn } }
+    case FILES:
+      return { ...state, files: payload.result.files }
     default:
       return state
   }
