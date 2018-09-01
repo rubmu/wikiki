@@ -10,15 +10,17 @@ import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import Paper from '@material-ui/core/Paper'
 
-import SignInSignOut from 'components/molecules/SignInSignOut/SignInSignOut'
 import { files } from 'actions/gapiActions'
+import { size } from 'core/styleUtils'
+import SignInSignOut from 'components/molecules/SignInSignOut/SignInSignOut'
+
 
 // flow globals
 declare var gapi: Object
 
 const AppRoot = styled.div`
 font-family: ${({ theme }) => theme.typography.fontFamily};
-font-size: ${({ theme }) => theme.typography.fontSize};
+font-size: ${({ theme }) => size(theme.typography.fontSize)};
 min-height: 100vh;
 `
 

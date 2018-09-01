@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import Button from '@material-ui/core/Button'
 import ExitToApp from '@material-ui/icons/ExitToApp'
 
+import { size } from 'core/styleUtils'
 import { initGapi, signOut } from 'actions/gapiActions'
 
 // flow globals
@@ -31,7 +32,7 @@ ${(props) => props.visible ? '' : 'display: none !important'}
 `
 
 const SignOutIcon = styled(ExitToApp)`
-margin-right: ${({ theme }) => theme.spacing.unit}px
+margin-right: ${({ theme }) => size(theme.spacing.unit)};
 `
 
 class SignInSignOut extends PureComponent<Object, Object> {
