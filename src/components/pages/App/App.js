@@ -3,6 +3,7 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
+import memoize from 'memoize-one'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
@@ -49,6 +50,12 @@ class App extends PureComponent<Object, Object> {
     }
   }
 
+  getFileList = memoize(files =>
+    files
+      .sort((a, b) => a.name < b.name ? -1 : (a.name === b.name ? 0 : 1))
+      .map(file => <Text key={file.id}> {file.name} ({file.mimeType}) </Text>)
+  )
+
   render() {
     const { signedIn, user } = this.props || {};
     const { name } = user || {};
@@ -67,7 +74,7 @@ class App extends PureComponent<Object, Object> {
           </Toolbar>
         </AppBar>
         <Content>
-          {files.map(file => <Text key={file.id}> {file.name} ({file.mimeType}) </Text>)}
+          {this.getFileList(files)}
           { !signedIn && <TextBox>Please login with Google</TextBox>}
         </Content>
       </AppRoot>
