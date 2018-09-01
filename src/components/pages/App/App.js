@@ -3,6 +3,12 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import IconButton from '@material-ui/core/IconButton'
+import MenuIcon from '@material-ui/icons/Menu'
+import Paper from '@material-ui/core/Paper'
 
 import SignInSignOut from 'components/molecules/SignInSignOut/SignInSignOut'
 import { files } from 'actions/gapiActions'
@@ -11,27 +17,26 @@ import { files } from 'actions/gapiActions'
 declare var gapi: Object
 
 const AppRoot = styled.div`
-text-align: center;
-background-color: #222;
-color: white;
+font-family: ${({ theme }) => theme.typography.fontFamily};
+font-size: ${({ theme }) => theme.typography.fontSize};
 min-height: 100vh;
 `
 
-const Header = styled.header`
-height: 150px;
-padding: 8px;
-`
-
-const Title = styled.h1`
-font-size: 0.9rem;
-line-height: 2.6rem;
-display: inline;
-`
-
 const Content = styled.div`
-font-size: small;
-text-align: left;
-padding: 0 1rem;
+padding: 68px 1rem 0 1rem;
+`
+
+const MenuButton = styled(IconButton)`
+margin-left: -12;
+margin-right: 20;
+`
+
+const Text = styled(Typography)`
+flex-grow: 1;
+`
+
+const TextBox = styled(Paper)`
+padding: 20px;
 `
 
 class App extends PureComponent<Object, Object> {
@@ -45,14 +50,23 @@ class App extends PureComponent<Object, Object> {
   render() {
     const { signedIn, user } = this.props || {};
     const { name } = user || {};
+    const files = (signedIn && this.props.files) || [];
     return (
       <AppRoot>
-        <Header>
-          <SignInSignOut />
-          <Title>{signedIn ? `Welcome ${name}!` : 'Please log in.'}</Title>
-        </Header>
+        <AppBar>
+          <Toolbar>
+            <MenuButton color="inherit" aria-label="Menu">
+              <MenuIcon />
+            </MenuButton>
+            <Text color="inherit" variant="title" >
+              {signedIn ? `Welcome ${name}` : 'Login'}
+            </Text>
+            <SignInSignOut />
+          </Toolbar>
+        </AppBar>
         <Content>
-          {(this.props.files || []).map(file => <div key={file.id}> {file.name} ({file.mimeType}) </div>)}
+          {files.map(file => <Text key={file.id}> {file.name} ({file.mimeType}) </Text>)}
+          { !signedIn && <TextBox>Please login with Google</TextBox>}
         </Content>
       </AppRoot>
     )

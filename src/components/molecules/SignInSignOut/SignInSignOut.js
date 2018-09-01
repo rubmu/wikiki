@@ -3,6 +3,8 @@
 import React, { PureComponent, Fragment } from 'react'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
+import Button from '@material-ui/core/Button'
+import ExitToApp from '@material-ui/icons/ExitToApp'
 
 import { initGapi, signOut } from 'actions/gapiActions'
 
@@ -13,16 +15,23 @@ const SignIn = styled.div`
 ${(props) => props.hidden ? 'display: none' : ''};
 float: right;
 .abcRioButtonContentWrapper {
-  background-color: #222;
-  color: white;
+  background-color: ${({ theme }) => theme.palette.primary.main};
+
+  .abcRioButtonContents {
+    color: ${({ theme }) => theme.palette.getContrastText(theme.palette.primary.main)};
+    font-family: ${({ theme }) => theme.typography.button.fontFamily};
+    font-size: 0.8125rem !important;
+    font-weight: ${({ theme }) => theme.typography.button.fontWeight};
+    text-transform: ${({ theme }) => theme.typography.button.textTransform};
+  }
 }
 `
-const SignOut = styled.div`
-${(props) => props.visible ? '' : 'display: none'};
-float: right;
-font-size: 0.8em;
-border: 1px solid #111;
-padding: 10px;
+const SignOut = styled(Button)`
+${(props) => props.visible ? '' : 'display: none !important'}
+`
+
+const SignOutIcon = styled(ExitToApp)`
+margin-right: ${({ theme }) => theme.spacing.unit}px
 `
 
 class SignInSignOut extends PureComponent<Object, Object> {
@@ -38,7 +47,9 @@ class SignInSignOut extends PureComponent<Object, Object> {
         <SignIn hidden={signedIn}>
           <span className="g-signin2" />
         </SignIn>
-        <SignOut onClick={this.props.signOut} visible={signedIn}>Sign out</SignOut>
+        <SignOut variant="contained" color="primary" size="small" onClick={this.props.signOut} visible={signedIn ? 'visible' : ''}>
+          <SignOutIcon /> Sign out
+        </SignOut>
       </Fragment>
     )
   }
